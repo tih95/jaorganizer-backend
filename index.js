@@ -80,7 +80,8 @@ app.put('/api/jobs/:id', async (req, res) => {
     jobLink: body.jobLink,
     status: body.status,
     company: body.company,
-    location: body.location
+    location: body.location,
+    dateApplied: body.dateApplied
   }
 
   try {
