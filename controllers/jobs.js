@@ -1,4 +1,8 @@
-app.get('/api/jobs', async (req, res) => {
+const jobsRouter = require('express').Router();
+const { Job } = require('../models/job');
+
+
+jobsRouter.get('', async (req, res) => {
   try {
     const result = await Job.find({});
     console.log(result);
@@ -11,19 +15,19 @@ app.get('/api/jobs', async (req, res) => {
   
 })
 
-app.get('/api/jobs/:id', async (req, res) => {
+jobsRouter.get('/:id', async (req, res) => {
   try {
     const result = await Job.findById(req.params.id);
 
     res.json(result);
   }
   catch(e) {
-    res.status(404).json({error: 'Does not exist'});
+    res.status(404).json({error: 'Job does not exist'});
   }
   
 })
 
-app.post('/api/jobs', async (req, res) => {
+jobsRouter.post('/', async (req, res) => {
   const body = req.body;
 
   const newJob = new Job({
@@ -32,7 +36,7 @@ app.post('/api/jobs', async (req, res) => {
     status: body.status,
     company: body.company,
     location: body.location,
-    dateApplied: new Date()
+    dateApplied: body.dateApplied
   });
 
   try {
@@ -45,7 +49,7 @@ app.post('/api/jobs', async (req, res) => {
   }
 })
 
-app.put('/api/jobs/:id', async (req, res) => {
+jobsRouter.put('/:id', async (req, res) => {
   const body = req.body;
 
   const editedJob = {
@@ -53,7 +57,8 @@ app.put('/api/jobs/:id', async (req, res) => {
     jobLink: body.jobLink,
     status: body.status,
     company: body.company,
-    location: body.location
+    location: body.location,
+    dateApplied: body.dateApplied
   }
 
   try {
@@ -66,7 +71,7 @@ app.put('/api/jobs/:id', async (req, res) => {
   }
 })
 
-app.delete('/api/jobs/:id', async (req, res) => {
+jobsRouter.delete('/:id', async (req, res) => {
   try {
     await Job.findByIdAndDelete(req.params.id);
 
@@ -76,3 +81,5 @@ app.delete('/api/jobs/:id', async (req, res) => {
     console.log(e);
   }
 })
+
+module.exports = jobsRouter;
