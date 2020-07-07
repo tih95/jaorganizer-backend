@@ -1,84 +1,93 @@
 const jobsRouter = require('express').Router();
-const { Job } = require('../models/job');
+const pool = require('../db');
 
+const { authorizeToken } = require('../middleware/authorizeToken');
 
-jobsRouter.get('', async (req, res) => {
+jobsRouter.get('/', authorizeToken, async (req, res) => {
+  const user = req.user;
+
   try {
-    const result = await Job.find({});
-    console.log(result);
+    const result = await pool.query(
+      `SELECT * FROM jobs WHERE user_id = $1`,
+      [user.id]
+    )
   
-    res.json(result);
+    res.json(result.rows);
   }
   catch(e) {
     console.log(e);
   }
-  
 })
 
-jobsRouter.get('/:id', async (req, res) => {
-  try {
-    const result = await Job.findById(req.params.id);
+jobsRouter.get('/:id', authorizeToken, async (req, res) => {
+  const { id } = req.params;
 
-    res.json(result);
+  try {
+    const result = await pool.query(
+      `SELECT * FROM jobs WHERE id = $1`, 
+      [id]
+    )
+
+    res.json(result.rows[0]);
   }
   catch(e) {
     res.status(404).json({error: 'Job does not exist'});
   }
-  
 })
 
-jobsRouter.post('/', async (req, res) => {
+jobsRouter.post('/', authorizeToken, async (req, res) => {
   const body = req.body;
-
-  const newJob = new Job({
-    title: body.title,
-    jobLink: body.jobLink,
-    status: body.status,
-    company: body.company,
-    location: body.location,
-    dateApplied: body.dateApplied
-  });
+  const user = req.user;
 
   try {
-    const result = await newJob.save();
+    const result = await pool.query(
+      `INSERT INTO jobs 
+        (title, \"jobLink\", \"dateApplied\", location, company, status, user_id) 
+        VALUES($1, $2, $3, $4, $5, $6, $7) 
+        RETURNING *`,
+      [body.title, body.jobLink, body.dateApplied, 
+        body.location, body.company, body.status, user.id]
+    )
 
-    res.json(result);
+    res.status(201).json(result.rows[0]);
+  }
+  catch(e) {
+    res.status(400).json({error: 'invalid request'});
+  }
+})
+
+jobsRouter.put('/:id', authorizeToken, async (req, res) => {
+  const body = req.body;
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      `UPDATE jobs SET 
+        title = $1, \"jobLink\"= $2, status = $3, company = $4, \"dateApplied\" = $5, location = $6 
+        WHERE id = $7 
+        RETURNING *`,
+      [body.title, body.jobLink, body.status, body.company, body.dateApplied, body.location, id] 
+    )
+
+    res.json(result.rows[0]);
   }
   catch(e) {
     console.log(e);
   }
 })
 
-jobsRouter.put('/:id', async (req, res) => {
-  const body = req.body;
-
-  const editedJob = {
-    title: body.title,
-    jobLink: body.jobLink,
-    status: body.status,
-    company: body.company,
-    location: body.location,
-    dateApplied: body.dateApplied
-  }
-
+jobsRouter.delete('/:id', authorizeToken, async (req, res) => {
+  const { id } = req.params;
   try {
-    const result = await Job.findByIdAndUpdate(req.params.id, editedJob, { new: true });
-
-    res.json(result);
-  }
-  catch(e) {
-    console.log(e);
-  }
-})
-
-jobsRouter.delete('/:id', async (req, res) => {
-  try {
-    await Job.findByIdAndDelete(req.params.id);
+    await pool.query(
+      `DELETE FROM jobs WHERE id = $1`, 
+      [id]
+    )
 
     res.status(204).end();
   }
   catch(e) {
-    console.log(e);
+    res.status(400).json({error: e})
   }
 })
 
