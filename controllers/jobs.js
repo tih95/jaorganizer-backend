@@ -42,11 +42,11 @@ jobsRouter.post('/', authorizeToken, async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO jobs 
-        (title, \"jobLink\", \"dateApplied\", location, company, status, user_id) 
-        VALUES($1, $2, $3, $4, $5, $6, $7) 
+        (title, \"jobLink\", \"dateApplied\", location, company, status, user_id, notes) 
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8) 
         RETURNING *`,
       [body.title, body.jobLink, body.dateApplied, 
-        body.location, body.company, body.status, user.id]
+        body.location, body.company, body.status, user.id, body.notes]
     )
 
     res.status(201).json(result.rows[0]);
@@ -63,10 +63,10 @@ jobsRouter.put('/:id', authorizeToken, async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE jobs SET 
-        title = $1, \"jobLink\"= $2, status = $3, company = $4, \"dateApplied\" = $5, location = $6 
-        WHERE id = $7 
+        title = $1, \"jobLink\"= $2, status = $3, company = $4, \"dateApplied\" = $5, location = $6, notes = $7
+        WHERE id = $8
         RETURNING *`,
-      [body.title, body.jobLink, body.status, body.company, body.dateApplied, body.location, id] 
+      [body.title, body.jobLink, body.status, body.company, body.dateApplied, body.location, body.notes, id] 
     )
 
     res.json(result.rows[0]);
