@@ -2,10 +2,10 @@
   "name": "jaorganizer-backend",
   "version": "1.0.0",
   "description": "App to organize job applications",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "author": "Tristan",
   "license": "ISC",

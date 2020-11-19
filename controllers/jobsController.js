@@ -1,9 +1,6 @@
-const jobsRouter = require('express').Router();
 const pool = require('../db');
 
-const { authorizeToken } = require('../middleware/authorizeToken');
-
-jobsRouter.get('/', authorizeToken, async (req, res) => {
+exports.getAllJobs = async (req, res) => {
   const user = req.user;
 
   try {
@@ -17,9 +14,9 @@ jobsRouter.get('/', authorizeToken, async (req, res) => {
   catch(e) {
     console.log(e);
   }
-})
+}
 
-jobsRouter.get('/:id', authorizeToken, async (req, res) => {
+exports.getOneJob = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -33,9 +30,9 @@ jobsRouter.get('/:id', authorizeToken, async (req, res) => {
   catch(e) {
     res.status(404).json({error: 'Job does not exist'});
   }
-})
+}
 
-jobsRouter.post('/', authorizeToken, async (req, res) => {
+exports.addJob = async (req, res) => {
   const body = req.body;
   const user = req.user;
 
@@ -54,9 +51,9 @@ jobsRouter.post('/', authorizeToken, async (req, res) => {
   catch(e) {
     res.status(400).json({error: 'invalid request'});
   }
-})
+}
 
-jobsRouter.put('/:id', authorizeToken, async (req, res) => {
+exports.editJob = async (req, res) => {
   const body = req.body;
   const { id } = req.params;
 
@@ -74,9 +71,9 @@ jobsRouter.put('/:id', authorizeToken, async (req, res) => {
   catch(e) {
     console.log(e);
   }
-})
+}
 
-jobsRouter.delete('/:id', authorizeToken, async (req, res) => {
+exports.deleteJob = async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query(
@@ -89,6 +86,4 @@ jobsRouter.delete('/:id', authorizeToken, async (req, res) => {
   catch(e) {
     res.status(400).json({error: e})
   }
-})
-
-module.exports = jobsRouter;
+}

@@ -17,7 +17,7 @@ const getTokenFromRequest = request => {
 // token and verifying it with the jwt.verify() method.
 // If it the token and decodedToken id is present, then it 
 // sets the user object on the request object.
-const authorizeToken = (req, res, next) => {
+exports.authorizeToken = (req, res, next) => {
   const token = getTokenFromRequest(req);
   const decodedToken = jwt.verify(token, config.SECRET);
 
@@ -33,5 +33,3 @@ const authorizeToken = (req, res, next) => {
     res.status(401).json({ error: 'authorization denied' })
   }
 }
-
-module.exports = { authorizeToken };
